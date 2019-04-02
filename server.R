@@ -145,7 +145,8 @@ shinyServer(function(input, output, session) {
     
     if (!inherits(compare_targets_out,"error") ){
       compare_targets_out  %>% 
-        purrr::pluck(.,"summary.indicators")
+        purrr::pluck(.,"summary.indicators") %>% 
+        dplyr::arrange(-abs(diff))
     } else {
       NULL
     }

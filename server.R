@@ -34,16 +34,6 @@ shinyServer(function(input, output, session) {
   
   user_input <- reactiveValues(authenticated = FALSE, status = "")
   
-  observeEvent(input$file1, {
-    shinyjs::enable("validate")
-    ready$ok <- FALSE
-  }) 
-  
-  observeEvent(input$validate, {
-    shinyjs::disable("validate")
-    user_input$authenticated <- checkIsAuthenticated()
-  })  
-  
   observeEvent(input$login_button, {
     user_input$authenticated <-DHISLogin(input$server,input$user_name,input$password)
   })   
@@ -88,7 +78,6 @@ shinyServer(function(input, output, session) {
                 ".xlsx"
               )
             ),
-            actionButton("validate","Validate"),
             tags$hr(),
             downloadButton("downloadFlatPack", "Download Comparison")
           ),
@@ -132,7 +121,7 @@ shinyServer(function(input, output, session) {
     
     withProgress(message = 'Parsing files...', value = 0,{
       
-      incProgress(0.1, detail = ("Running comparison analysis"))
+      incProgress(0.5, detail = ("Running comparison analysis"))
       d<-tryCatch({
         
         datapackr::comparePacks(datapack_path = dp_in$datapath,
@@ -174,8 +163,8 @@ shinyServer(function(input, output, session) {
     },
     content = function(file) {
       
-      download_data <- compare_targets()  %>%
-        rlist::list.remove(.,"datapack_name")
+      download_data <- compare_targets()
+      
       wb <- openxlsx::createWorkbook()
       
       sheetNames <- c("Data Pack Data", "Site Tool Data", "Comparison", "Diffs",
@@ -183,14 +172,14 @@ shinyServer(function(input, output, session) {
       
       invisible(sapply(sheetNames, function(x) openxlsx::addWorksheet(wb, sheetName = x)))
       
-      openxlsx::writeData(wb, sheet = 1, x = datapack_data)
-      openxlsx::writeData(wb, sheet = 2, x = sitetool_data)
-      openxlsx::writeData(wb, sheet = 3, x = comparison)
-      openxlsx::writeData(wb, sheet = 4, x = diffs)
-      openxlsx::writeData(wb, sheet = 5, x = summary.categories)
-      openxlsx::writeData(wb, sheet = 6, x = summary.indicators)
+      openxlsx::writeData(wb, sheet = 1, x = download_data$datapack_data)
+      openxlsx::writeData(wb, sheet = 2, x = download_data$sitetool_data)
+      openxlsx::writeData(wb, sheet = 3, x = download_data$comparison)
+      openxlsx::writeData(wb, sheet = 4, x = download_data$diffs)
+      openxlsx::writeData(wb, sheet = 5, x = download_data$summary.categories)
+      openxlsx::writeData(wb, sheet = 6, x = download_data$summary.indicators)
       
-      openxlsx::write.xlsx(download_data, file = file)
+      openxlsx::write.xlsx(wb, file = file)
       
     })
   

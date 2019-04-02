@@ -107,8 +107,8 @@ shinyServer(function(input, output, session) {
   
   compare<-function() {
     
+    shinyjs::hide("downloadFlatPack")
     if (!user_input$authenticated) {return(NULL)}
-    
     dp_in <- input$datapack
     st_in <- input$sitetool
     messages<-""
@@ -132,7 +132,7 @@ shinyServer(function(input, output, session) {
       
       
     })
-    
+    shinyjs::show("downloadFlatPack")
     return(d)
     
   }
@@ -179,7 +179,7 @@ shinyServer(function(input, output, session) {
       openxlsx::writeData(wb, sheet = 5, x = download_data$summary.categories)
       openxlsx::writeData(wb, sheet = 6, x = download_data$summary.indicators)
       
-      openxlsx::write.xlsx(wb, file = file)
+      openxlsx::saveWorkbook(wb, file = file)
       
     })
   

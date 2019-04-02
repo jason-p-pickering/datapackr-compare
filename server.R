@@ -197,7 +197,7 @@ shinyServer(function(input, output, session) {
   
   output$messages <- renderUI({
     
-    vr<-validation_results()
+    vr<-compare_targets()
     messages<-NULL
     
     if ( is.null(vr) ) {

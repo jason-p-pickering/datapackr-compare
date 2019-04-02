@@ -118,7 +118,6 @@ shinyServer(function(input, output, session) {
   
   compare<-function() {
     
-
     if (!user_input$authenticated) {return(NULL)}
     
     dp_in <- input$datapack
@@ -149,14 +148,14 @@ shinyServer(function(input, output, session) {
     
   }
   
-  validation_results <- reactive({ compare() })
+  compare_targets <- reactive({ compare() })
   
   output$indicator_summary<-renderDataTable({
     
-    compare_targets<-compare()
+    compare_targets_out <-compare_targets()
     
-    if (!inherits(compare_targets,"error") ){
-      compare_targets  %>% 
+    if (!inherits(compare_targets_out,"error") ){
+      compare_targets_out  %>% 
         purrr::pluck(.,"summary.indicators")
     } else {
       NULL
@@ -168,14 +167,14 @@ shinyServer(function(input, output, session) {
     
     filename = function() {
       
-      datapack_name <- compare() %>%  purrr::pluck("datapack_name")
+      datapack_name <- compare_targets() %>%  purrr::pluck("datapack_name")
       prefix <- "DataPack_SiteTool_Comparison_"
       date<-format(Sys.time(),"%Y%m%d_%H%M%S")
       paste0(paste(prefix,datapack_name,date,sep="_"),".xlsx")
     },
     content = function(file) {
       
-      download_data <- compare()  %>%
+      download_data <- compare_targets()  %>%
         rlist::list.remove(.,"datapack_name")
       wb <- openxlsx::createWorkbook()
       
@@ -208,6 +207,8 @@ shinyServer(function(input, output, session) {
     if ( inherits(vr,"error") ) {
       return( paste0("ERROR! ",vr$message) )
       
+    } else {
+      tags$li('Comparison analysis complete. Click "Download Comparison" for a detailed report' )
     }
     
   })
